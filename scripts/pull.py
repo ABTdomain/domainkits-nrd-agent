@@ -201,7 +201,9 @@ def pull(task, config, source, clock):
     # set it, asked for by registration date. A pull reads them to the end and brings in each one that is new, at
     # each pull: no other number bounds it. So a domain that comes to match days after it was registered (its
     # nameservers were moved, a mail server was set) is brought in at the next pull, wherever it stands among the
-    # rows the task knows already: that is the polling this design is for.
+    # rows the task knows already: that is the polling this design is for. After a pause longer than the window, as
+    # when the machine was off, the pull starts over with the window of that day and does not read back: what was
+    # registered before it is past the window the user chose, and this agent is about being early.
     days = config.get("window_days", WINDOW_DAYS)
     window = {"registered_from": (today - timedelta(days=days - 1)).isoformat(), "registered_to": today.isoformat()}
     n = {"calls": 0, "rows": 0, "added": 0}
