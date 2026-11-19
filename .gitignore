@@ -1,0 +1,17 @@
+# keys
+.env
+.env.*
+*.env
+
+# task folders and what the programs write into them
+config.json
+state.csv
+found.csv
+log.jsonl
+run.lock
+domains/
+archive/
+
+# Python
+__pycache__/
+*.pyc
