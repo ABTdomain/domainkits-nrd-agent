@@ -90,7 +90,14 @@ Frequency and timing are the user's decision. Say once what a pull and a check c
 
 ### 1.4 Who is told, and where
 
-Ask who looks at what the task tells, how often, and where it is to go. The first two answers go into `purpose`, in the user's words, the third into `deliver`. How the loop closes is section 4.
+Ask who looks at what the task tells, how often, and how it reaches them. The first two answers go into `purpose`, in the user's words, the third into `deliver`. How the loop closes is section 4.
+
+Say what the programs leave to the user, and ask how they will handle it, without waiting to be asked:
+
+- The programs end at found.csv in the task folder: they send no message, no mail and no chat notice, and there is no dashboard. Tell the user, without being asked, that their own tools can take over there. Another agent of theirs (an AI agent, or an automation they run) can read found.csv, and state.csv and the domains' files where it needs more, and bring what is told to them or their team. Or what is told can go straight into a system they use, through its interface: their team's chat, their tickets or their database, for example. What is then done about a domain stays their decision. Ask what they have and what they want, or whether they will open the file themselves.
+- The programs run only when the user's own scheduler starts them, on the machine it runs on. While that machine is off or asleep nothing is pulled or checked: the checks that came due wait, and because a pull by keyword looks back only `window_days` days, domains registered during a longer pause are not brought in by it. The lookalike pull is not bound to registration dates and catches up. Ask on which machine the programs will run and how they are started.
+
+Where the user wants a notice, a dashboard, hosting, another agent or a system of theirs connected, say that the design leaves these to them and that you can help them connect it; build it only where they ask you to. Whatever is connected reads the files of the task folder and does not write them: the programs keep writing state.csv, the domains' files and found.csv.
 
 What is told by default is in section 2.4. On the typo side: each domain once at its first check (what its site shows, or that it was registered and nothing shows yet), and each change of its state. On the business side: a site that shows or sells the user's brand. Not told, and kept in state.csv: a domain of the typo side whose name consists of ordinary words and whose site is in another field than the user's, and a site of the user's field without the brand. Say this to the user. Where they want to hear of more, or of less, their words go into `purpose` too.
 
@@ -250,4 +257,5 @@ When the user comes back, or asks what was found:
 - The next step for a domain is theirs. Do not propose one. Where they want to see what a page showed, the domain's file holds each reply as it was received, with its time: hand it over as it is.
 - Ask where a state was judged differently from how they see it, and why. The task is adjusted by the answers: the sentence in `related`, the main typos and the core keywords, the frequency.
 - A domain the user is done with goes on `exclude`: their own registration, a business they know, a case they have dealt with.
+- Where the user still takes what is told on by hand, say again that another agent of theirs, or the interface of a system they use, can take that over from found.csv (1.4). This is about how what is told reaches them, not a next step for a domain.
 - Change config.json and show the change. The programs follow it from their next run.

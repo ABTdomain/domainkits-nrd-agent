@@ -111,13 +111,16 @@ Frequency and timing are the user's decision. Say once what a pull and a check c
 
 ### 1.6 Ask where it ends
 
-Watching is not the end. Before the file is written, ask the user three things, and do not wait to be asked:
+Watching is not the end. Before the file is written, ask the user four things, and do not wait to be asked:
 
 - What the watching is for: what they will do when something is found.
-- Where the finds are to go: a file they open, or a system of their own that takes them from there.
+- How the finds reach them, and what takes them further. The programs end at found.csv in the task folder: they send no message, no mail and no chat notice, and there is no dashboard. Tell the user, without being asked, that this is where their own tools can take over. Another agent of theirs (an AI agent, or an automation they run) can read found.csv, and state.csv and the domains' files where it needs more, and carry the finds on toward their purpose. Or the finds can go straight into a system they use, through that system's interface: their CRM, their tickets, their team's chat or their database, for example. Ask what they have and what they want, or whether they will open the file themselves.
+- Where the programs run. They run only when the user's own scheduler starts them, on the machine it runs on. While that machine is off or asleep nothing is pulled or checked: the checks that came due wait, and because a pull looks back only `window_days` days, domains registered during a longer pause are not brought in. Ask on which machine the programs will run and how they are started.
 - How the loop closes: how often they look at the finds, and how they tell you which ones were of use.
 
-The first answer goes into config.json as `purpose`, in the user's words. It decides what is worth telling them: for someone who sells to new businesses, a site that came into use; for someone who watches competitors, a change on a site in use. The second goes into `deliver`. The third is section 4.
+The first answer goes into config.json as `purpose`, in the user's words. It decides what is worth telling them: for someone who sells to new businesses, a site that came into use; for someone who watches competitors, a change on a site in use. The second goes into `deliver`, in the user's words. The fourth is section 4.
+
+Where the user wants a notice, a dashboard, hosting, another agent or a system of theirs connected, say that the design leaves these to them and that you can help them connect it; build it only where they ask you to. Whatever is connected reads the files of the task folder and does not write them: the programs keep writing state.csv, the domains' files and found.csv.
 
 The agent hands the finds over and stops there. It contacts no one and drafts no message.
 
@@ -175,7 +178,7 @@ The agent hands the finds over and stops there. It contacts no one and drafts no
 | pulls | you, chosen with the user | a list; each entry has `kind` (keyword or tld), its items as a list (`keywords` for a keyword pull, `tlds` for a tld pull) and `filters`, written with the names and values of the tool's parameters so the program passes them on as they are |
 | frequency | you from the defaults, decided by the user | how often each state is checked; "ladder" is the ladder by days since registration (section 3); `preparing` has a step for each of its two tiers (2.2); `robots_disallow` is the step for a site that robots.txt closes to the fetch |
 | purpose | you, from the user | what the user will do with the finds, in their words (1.6) |
-| deliver | you, decided by the user | where the finds go (1.6) |
+| deliver | you, decided by the user | how the finds reach the user, in their words (1.6). It is a note for you and the user: the programs write found.csv and send nothing |
 | exclude | the user, or you on their word | domains the user is done with: they are not pulled and not checked again |
 | models | you, decided by the user | `judge`: the model that judges (section 2); Claude Sonnet 5.5 or above, or a model of the same class of another provider, is recommended. Which model, the user decides. `change`, optional: a low-tier model that is asked first, at a later check, whether the site changed since its last judgement (section 3). A model of another provider is written with the provider in front, as in `openai:gpt-6.2-sol`; a name without one is a Claude model |
 | pull_every, window_days, min_interval, limits | you from the defaults, decided by the user | how often new domains are pulled (1.5), how many days back a pull looks (3 by default; the domains registered in those days are read to the end at each pull, 1.4), the lower bound between two fetches of one site, how many domains one run checks |
@@ -307,4 +310,4 @@ When the user comes back, or asks what was found:
 - A domain that passed `retire_days` is in the archive: its last state in archive/state.csv, its file under archive/domains. Read them where the user asks about a domain that is no longer in state.csv. Where the watching ends too soon or too late for them, change `retire_days`: the new number holds for the domains still in state.csv, and a domain in the archive stays there.
 - Change config.json and show the change. The programs follow it from their next run.
 
-Where the finds are to reach a system of the user's own, that system takes found.csv from the task's folder. Say so, and do not build a connection the user has not asked for.
+Where the user still takes the finds on by hand, say again that another agent of theirs, or the interface of a system they use, can take that over from found.csv (1.6). Whatever is connected reads the task folder and does not write it. Build the connection only where the user asks for it.

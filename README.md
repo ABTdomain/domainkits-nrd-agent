@@ -31,6 +31,7 @@ The agent hands its finds over and stops there. It contacts no one and drafts no
 2. **Pull.** `scripts/pull.py` asks DomainKits for the domains registered in the last `window_days` days (3 by default) that match the task's keywords or TLDs and filters, and adds the new ones to `state.csv`. A protection task also pulls the registered typos of your domain.
 3. **Check.** `scripts/run.py` takes the rows that are due, reads robots.txt, fetches the homepage through the fetch service, and gives what came back to a model with section 2 of the skill. The model gives the state and what to tell you. The program writes the row and works out the time of the next check from `frequency`. Finds go to `found.csv`.
 4. **Close the loop.** You read `found.csv` with your agent, say which finds were of use, and the task is adjusted in `config.json`.
+5. **Take it further.** `found.csv` and `state.csv` are plain files. Another agent of yours, or the interface of a system you use (a CRM, tickets, a team chat, a database), can take the finds from there into your own work. The agent offers this in the set-up conversation and helps you connect it when you ask.
 
 ## Requirements
 
