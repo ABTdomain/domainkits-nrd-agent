@@ -30,9 +30,9 @@ SOURCE = {"read_on": "2026-11-17",
           "nrds_cctld": "all", "counting": "each filter counts as one",
           "limits": {"daily_remaining": None, "rate_per_minute": None}}
 CONFIG = {
-    "intent": "I sell flooring to contractors. I want to see new flooring and remodeling businesses in the US.",
+    "intent": "I run a flooring and remodeling business in Austin, Texas. I want to see whether new competitors open around me.",
     "related": "A business in the US that sells or installs flooring or does home remodeling.",
-    "purpose": "I want to know when a new flooring business has a site in use.",
+    "purpose": "I want to know when a new competitor has a site in use and what it offers, and later what changes on it.",
     "pulls": [{"kind": "keyword", "keywords": ["flooring"],
                "filters": {"tld": "com", "mx_status": "1", "exclude_mx": "registrar-servers.com"}}],
     "frequency": {"unknown": "ladder", "preparing": {"high": "1h", "low": "ladder"}, "in_use": "3d",

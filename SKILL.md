@@ -55,7 +55,7 @@ One question decides it: can the sites the user is after be recognised by their 
 | keyword | The name usually carries a word of the trade. An industry, a market and a study of the competition in an industry are the same pull. | `nrds` by keyword | Offer keywords of the industry and of what surrounds it, in groups, and let the user choose. Or take the keywords the user gives. |
 | tld | The names carry no word of the trade, as with tech and startups. A keyword search has little to hold on to there. | `nrds` by TLD: ai, io, dev and app are the first to think of | Agree on the TLDs. The filters of 1.4 matter most here. |
 
-Keywords describe the sites the user is after, not the user: a lawyer who looks for construction companies needs words of construction.
+Keywords describe the sites the user is after, not the user: someone who looks for new projects in health care needs words of health care, not words of their own trade.
 
 One direction can need two pulls, such as keywords and a TLD. Two directions that have little to do with each other are two tasks.
 
@@ -85,7 +85,7 @@ Further filters by kind of pull:
 | tld | the sale flag, the nameservers a domain is on (`ns`) or is not on (`exclude_ns`), length, no hyphens, no digits |
 
 - For new tech and indie projects, be careful with "MX present" (`mx_status` 1): such a project can have its site up before any mail is set up on the domain, and the filter leaves it out. That does not mean a pull with nothing in its place, and no fixed set of filters is prescribed here. Try the filters the account has in different combinations and work out the one that serves the user's direction best: the registration date, the nameservers a domain is on (`ns`) or is not on (`exclude_ns`), the sale flag, length, hyphens and digits, and the others the tool offers. For each combination, ask the data source how many rows it returns for one day and read the names. This trying happens in the conversation with the user, here and in section 4: the programs run the pulls as config.json holds them, and no model calls the data source on its own. One example of a combination, not a rule: the .ai domains on the nameservers of Vercel were 24 of the 1016 .ai domains registered on 2026-11-17, where "MX present" kept 250.
-- The window is the user's: how many days back they want to see (`window_days`). The default is 3 days; the user can choose another number, and it is written into config.json. The program asks for the domains registered in those days, by registration date, reads them to the end at each pull, for each keyword and each TLD of the task, and brings in each domain that is new: no other number limits a pull. So the days and the filters are what a pull costs: one call to the data source for every 10 rows in the window, at each pull, and at the first pull one first check for each domain the window holds, taken `checks_per_run` at a run. Ask the data source how many rows each pull returns over the window, say both numbers to the user, and let them choose the days, the filters and how often the pull runs (1.5). Reading whole windows with several filters combined is what the higher plans of the data source are for: where the account's limits in `source` do not carry it, say so. Sizes as examples, read on 2026-11-19: over 3 days the three keywords of 1.7 returned 16, 3 and 30 rows, 6 calls a pull, and over 30 days 280, 46 and 476 rows, 81 calls; the .ai domains on the nameservers of Vercel were 53 over 3 days and 903 over 30.
+- The window is the user's: how many days back they want to see (`window_days`). The default is 3 days; the user can choose another number, and it is written into config.json. The program asks for the domains registered in those days, by registration date, reads them to the end at each pull, for each keyword and each TLD of the task, and brings in each domain that is new: no other number limits a pull. So the days and the filters are what a pull costs: one call to the data source for every 10 rows in the window, at each pull, and at the first pull one first check for each domain the window holds, taken `checks_per_run` at a run. Ask the data source how many rows each pull returns over the window, say both numbers to the user, and let them choose the days, the filters and how often the pull runs (1.5). Reading whole windows with several filters combined is what the higher plans of the data source are for: where the account's limits in `source` do not carry it, say so. Sizes as examples, read on 2026-11-19: over 3 days the three keywords of the second example of 1.7 returned 16, 3 and 30 rows, 6 calls a pull, and over 30 days 280, 46 and 476 rows, 81 calls; the .ai domains on the nameservers of Vercel, the pull of the first example, were 53 over 3 days and 903 over 30.
 - A domain can come to match a pull after its registration: a mail server is set, the nameservers are moved to another service. Finding it then is what the pulls are repeated for. In the reply it stands by its registration date, behind rows the task has already; because each pull reads the window to the end, it is brought in at the next pull, for as long as its registration date is inside the window. How long after the registration domains still come to match differs by filter, and it can be measured when the user chooses the days: compare the filter's share among the domains registered today, two days ago and a week or two ago. One example, not a rule: of the .ai domains, read on 2026-11-19, a mail server was on 10% of those registered that day, on 25% of those registered two days before and on 23% of those registered nine days before; the nameservers of Vercel were on 2.4% to 3.1% at each of these ages.
 - The list of mail hosts to leave out can grow. A host that sits on most domains of one registrar is a default, not a choice of the holder (seen with IONOS, whose mail servers are set on new domains by default). Leaving such a host out also drops the businesses that do use it, so the user decides.
 - The keyword match is by substring. A short word catches other words ("law" is in "lawn"). Give it a position or excluded words, or take a longer word.
@@ -118,7 +118,7 @@ Watching is not the end. Before the file is written, ask the user four things, a
 - Where the programs run. They run only when the user's own scheduler starts them, on the machine it runs on. While that machine is off or asleep nothing is pulled or checked: the checks that came due wait. After a pause longer than `window_days` the next pull starts over with the window of that day: what was registered before it is past the window the user chose, and this agent is about being early. Ask on which machine the programs will run and how they are started.
 - How the loop closes: how often they look at the finds, and how they tell you which ones were of use.
 
-The first answer goes into config.json as `purpose`, in the user's words. It decides what is worth telling them: for someone who sells to new businesses, a site that came into use; for someone who watches competitors, a change on a site in use. The second goes into `deliver`, in the user's words. The fourth is section 4.
+The first answer goes into config.json as `purpose`, in the user's words. It decides what is worth telling them: for someone who looks for interesting new AI projects, a site that came into use; for someone who watches for competitors around them, a new competitor's site, and later a change on it. The second goes into `deliver`, in the user's words. The fourth is section 4.
 
 Where the user wants a notice, a dashboard, hosting, another agent or a system of theirs connected, say that the design leaves these to them and that you can help them connect it; build it only where they ask you to. Whatever is connected reads the files of the task folder and does not write them: the programs keep writing state.csv, the domains' files and found.csv.
 
@@ -126,21 +126,21 @@ The agent hands the finds over and stops there. It contacts no one and drafts no
 
 ### 1.7 Write config.json and show it
 
+Two examples of a task, each a config.json of its own. They are examples, not templates: each field comes from the conversation with the user.
+
+The first follows interesting new AI projects. In full:
+
 ```json
 {
-  "intent": "I sell flooring to contractors. I want to see new flooring and remodeling businesses in the US.",
-  "related": "A business in the US that sells or installs flooring or does home remodeling.",
-  "purpose": "I get in touch with new flooring businesses in their first weeks, so I want to know when one has a site in use.",
+  "intent": "I follow new AI projects. I want to see the interesting ones as soon as their site is up.",
+  "related": "A new tech or indie project built on AI, with a product of its own.",
+  "purpose": "I want to know when such a project has a site in use, and what it offers.",
   "pulls": [
     {
-      "kind": "keyword",
-      "keywords": ["flooring", "hardwood", "remodel"],
+      "kind": "tld",
+      "tlds": ["ai"],
       "filters": {
-        "tld": "com",
-        "has_sale": "false",
-        "mx_status": "1",
-        "exclude_mx": "registrar-servers.com,mx.cloudflare.net,fwd1.porkbun.com,fwd2.porkbun.com",
-        "exclude_ns": "parkingcrew.net,giantpanda.com,above.com,abovedomains.com,sedoparking.com,afternic.com,buydomains.com,atom.com"
+        "ns": "vercel-dns.com"
       }
     }
   ],
@@ -168,6 +168,29 @@ The agent hands the finds over and stops there. It contacts no one and drafts no
     "nrds_cctld": "all",
     "counting": "the search term, each filter and the sort count as one each"
   }
+}
+```
+
+The second looks for new competitors around a flooring business. It differs from the first in the direction and the pull, and the other fields are the same:
+
+```json
+{
+  "intent": "I run a flooring and remodeling business in Austin, Texas. I want to see whether new competitors open around me.",
+  "related": "A business in Texas that sells or installs flooring or does home remodeling.",
+  "purpose": "I want to know when a new competitor has a site in use and what it offers, and later what changes on it.",
+  "pulls": [
+    {
+      "kind": "keyword",
+      "keywords": ["flooring", "hardwood", "remodel"],
+      "filters": {
+        "tld": "com",
+        "has_sale": "false",
+        "mx_status": "1",
+        "exclude_mx": "registrar-servers.com,mx.cloudflare.net,fwd1.porkbun.com,fwd2.porkbun.com",
+        "exclude_ns": "parkingcrew.net,giantpanda.com,above.com,abovedomains.com,sedoparking.com,afternic.com,buydomains.com,atom.com"
+      }
+    }
+  ]
 }
 ```
 
