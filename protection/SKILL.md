@@ -5,28 +5,29 @@ description: 'Watch the domains that may concern your brand: the typos of your d
 
 # New Sites: protection
 
-This skill watches the domains that may concern the user's brand. It does two things. It keeps a state machine: which domains are in it, when each is looked at, and which state each is in. And it judges the state of a domain from what its site shows. When there is something the user needs to know, it tells them in one or two sentences what the domain is doing.
+This skill watches the domains that may concern the user's brand. It keeps a state machine (which domains are in it, when each is looked at, which state each is in) and judges the state of a domain from what its site shows. When there is something the user needs to know, it tells them in one or two sentences what the domain is doing.
 
 The decision is the user's. Whether a domain is a problem, what its holder intends, and what to do about it are not judged here. Cases differ too much for that: a typo can be a word of a language or an abbreviation, a registration can be older than the brand, and third parties who act in good faith come in many kinds. The skill gives no legal assessment and no advice, and it contacts no one. After it has told the user, it waits for their next step.
 
-It is one of two skills on the same programs. The other one, for business uses (new customers, competitors, new projects), is the SKILL.md one folder up. The files and the programs are described in section 3 of that SKILL.md.
+It is one of two skills on the same programs. The other one, for business uses (new customers, competitors, new projects), is the SKILL.md one folder up; the files and the programs are described in its section 3.
 
-## Background: the data and this use
+## The idea: see early what concerns the brand, without the noise
 
-DomainKits does not stop at listing newly registered domains. It keeps monitoring them: the mail servers, the nameservers and the registration date of each domain are kept current in the background. It also knows the typing variants of a domain name and which of them are registered.
+What the user wants is to see early the domains that concern their brand: at the time one is registered or its site comes up.
 
-Watching a brand has two sides, and a task holds both:
+What stands in the way is noise. Most newly registered domains stay idle, and most of the new sites that carry a word of the user's field have nothing to do with their brand. The task keeps the noise down before a page is read, and does it differently on its two sides:
 
 | Side | Starts from | What comes in |
 |---|---|---|
 | Typo | the user's name | the typos of the user's domain, and new registrations that hold the name or a typo of it |
 | Business | the user's product | new sites in the user's field, found by the core keywords of the product, whatever their name |
 
-The two sides are judged and told by different measures. A domain of the typo side concerns the user through its name, so what it is doing is told. A domain of the business side concerns the user only where its page shows or sells the user's brand: a site of the same field without the brand is someone else's business and is not told.
+- The typo side starts from the name. DomainKits knows the typing variants of a domain and which of them are registered, so the search is small by itself, and no filter is used: a domain with such a name is one to know about also when it is parked, for sale or without mail.
+- The business side starts from the user's intent: the product and its core keywords, which the user confirms. It uses the DomainKits filters as the business skill does (its sections 1.4 and 1.5): the mail servers, the nameservers and the registration date of each new domain, kept current, leave out what is parked, held for sale or shows no sign of its holder.
 
-On the typo side no filter is used: a domain with such a name is one to know about also when it is parked, for sale or without mail, and the search is small by itself. The business side is the flow of the business skill, where filters cut the search before a page is read.
+The noise does not go to nothing, and that is normal: a task is measured by what it shows the user early, not by the share of noise.
 
-A name that is close to the user's name is a reason to look and nothing more. What a domain is doing is read from its page.
+The two sides are judged and told by different measures. A domain of the typo side concerns the user through its name, so what it is doing is told. A domain of the business side concerns the user only where its page shows or sells the user's brand: a site of the same field without the brand is someone else's business and is not told. A name that is close to the user's name is a reason to look and nothing more: what a domain is doing is read from its page.
 
 ## 1. Setting up a task
 
@@ -49,6 +50,8 @@ Ask for both sides and keep the user's words:
 | intent | The user's words: which name is watched, with the brand and the domain written out. |
 | related | The measure for a site in use (2.2), in one sentence with two parts: a site that offers the same as or something similar to the user's product, or that shows or sells the user's brand. |
 
+The user judges your description: show them, in plain words, how you understand their product and their field, and the sentence for `related`, and ask whether it is accurate. Change it until they say it is right: each judgement of a site later is set against it.
+
 ### 1.2 The pulls
 
 | Side | What comes in | Example for google.com | Pull |
@@ -56,48 +59,38 @@ Ask for both sides and keep the user's words:
 | Typo | The typos themselves: each typing variant of the user's domain that is registered, the ones that exist today and each new one | gogle.com | `lookalike` on the user's domain |
 | Typo | New registrations that hold the name itself: longer names, and the name under other TLDs | google-login.com, google.ai | `keyword` with the name, without filters |
 | Typo | New registrations that hold a main typo | goglenice.com, gogle.shop | `keyword` with each main typo, without filters |
-| Business | New sites in the user's field | a new domain with "searchengine" in its name | `keyword` with each core keyword, with the filters of the business skill (its sections 1.1 and 1.4) |
+| Business | New sites in the user's field | a new domain with "searchengine" in its name | `keyword` with each core keyword, with the filters of the business skill |
 
 Each pull names its side in config.json: `"side": "typo"` or `"side": "business"`. The program writes the side into the record of each domain the pull brings in, and section 2 judges and tells by it.
 
 - Call the `typosquat` tool for the user's domain in the conversation and read the registered variants with the user. Some of them are the user's own registrations: those go on `exclude`.
-- Taking stock is a decision of its own. The lookalike pull takes each registered variant, the most recently registered first, and each of them is one check. For a name with hundreds of registered variants, say the number and let the user choose how far back the stock goes: `registered_from` on the lookalike pull leaves out the variants registered before that date. Without it all of them come in at the first pull, and the checks take them `checks_per_run` at a run. After the stock is taken, the pull brings in what is registered since.
-- The name itself is in the pulls by default. Without it, a new registration that holds the exact name, as a longer name or under another TLD, is not seen. For a name that many others carry, run the pull once, say how many names a week brings, and let the user narrow it with a position or excluded words, or take it out.
-- The main typos are the user's choice. Each variant comes with the number of TLDs its name is registered under (`prefix_tld_count`): the variants with the highest numbers are the typos people do register. Leave aside the rows where only the TLD differs: their number is that of the user's own name. Each keyword is one more query in each pull, so say what it costs.
-- A typo that is a part of the user's name (googl for google, domainkit for domainkits) also brings in each name that holds the name itself.
-- A typo that is an ordinary word (goggle for google) brings in that word's ordinary names when it is used as a keyword. Say so and let the user choose. The typo of the domain itself still comes in through the lookalike pull.
-- What these pulls do not see: a typo that was registered under another TLD before the window began (`window_days`: 3 days by default; a longer window is the user's choice). The number of TLDs shows that such registrations exist, and the `tld_check` tool lists them in the conversation. The programs do not watch them.
-- The filters of the business skill go on the pull by core keywords and nowhere else. Where the business skill speaks of filters, that is the business side here.
-- The keyword match is by substring. A short typo catches other words: give it a position or excluded words.
-- Before the file is written, run each pull once and read the names with the user.
+- Taking stock is a decision of its own. The lookalike pull takes each registered variant, the most recently registered first, and each of them is one check. For a name with hundreds of registered variants, say the number and let the user choose how far back the stock goes: `registered_from` on the lookalike pull leaves out the variants registered before that date. After the stock is taken, the pull brings in what is registered since.
+- The name itself is in the pulls by default: without it, a new registration that holds the exact name is not seen. For a name that many others carry, say how many names a week brings, and let the user narrow it with a position or excluded words, or take it out.
+- The main typos are the user's choice. Each variant comes with the number of TLDs its name is registered under (`prefix_tld_count`): the variants with the highest numbers are the typos people do register. Leave aside the rows where only the TLD differs: their number is that of the user's own name.
+- A typo that is a part of the user's name (googl for google, domainkit for domainkits) also brings in each name that holds the name itself. A typo that is an ordinary word (goggle for google) brings in that word's ordinary names as a keyword: say so and let the user choose. The typo of the domain itself still comes in through the lookalike pull.
+- What these pulls do not see: a typo that was registered under another TLD before the window began (`window_days`). The `tld_check` tool lists such registrations in the conversation; the programs do not watch them.
+- The filters go on the pull by core keywords and nowhere else.
+- Test each keyword as the business skill does (its section 1.4): read the names it brings over one recent week, sort them, and narrow a word whose names mostly mean something else. Tell the user, without being asked, that too many keywords bring too much noise and too much cost: each one is one more query at each pull, and each domain it brings in is one more check. The user confirms the name, the main typos and the core keywords before the file is written.
 
 ### 1.3 The frequencies
 
-How often and how wide the task watches is the user's to set. In this first conversation go through the numbers one by one: say the default of each, what it does and what it costs, and write what the user chooses into config.json. Leave none at its default without having said it:
+How often and how wide the task watches is the user's to set. Go through the numbers one by one: say the default of each, what it does and what it costs, and write what the user chooses into config.json. Leave none at its default without having said it:
 
-- How many days back the keyword pulls look (`window_days`, 3 by default; 1.2).
+- How many days back the keyword pulls look (`window_days`, 3 by default).
 - How often new registrations are pulled (`pull_every`). On the typo side a registration is itself something to know, so this pull runs often: one hour is a start. A task has one `pull_every`, so the pull by core keywords runs as often.
 - How often each state is checked (`frequency`). Before a site is up, often. A site in use that the user has been told about, seldom: 7 days is a start.
 - How often a site is looked at again while its robots.txt closes it to the fetch (`robots_disallow`, 6 hours as a start).
 - The lower bound between two fetches of one site (`min_interval`, 1 hour as a start), and how many domains one run checks (`checks_per_run` in `limits`, 50 as a start).
-- How long a domain is watched (`retire_days`, optional), counted from its registration date. With it, a domain that was registered that many days ago leaves the watching, whatever its state: its row and its file go into the archive of the task and it is not checked or pulled in again, and a domain that is past it already is not brought in. For this skill that means two things: the variants of the user's name that were registered longer ago than that are not watched at all, and a site in use that the user has not dealt with leaves once its domain is that old. To know what the existing typos are doing, leave the field out, as the example below does: each domain is then watched without an end and keeps its checks for as long as the task runs. Say both to the user and let them choose.
+- How long a domain is watched (`retire_days`, optional), counted from its registration date. With it, the variants registered longer ago than that are not watched at all, and a site in use leaves once its domain is that old. To know what the existing typos are doing, leave the field out, as the example below does.
 
-Frequency and timing are the user's decision. Say once what a pull and a check cost and leave the choice to them:
-
-- A pull is one call to the data source for each of the user's domains, and one for each page of each keyword.
-- A check is one read of robots.txt (up to three where the site does not answer), one read of the homepage by the fetch service, and one call of the model. A site that is closed or does not answer costs the read of robots.txt and, for a domain of the typo side at its first check, one call of the model.
-- What each of these costs depends on the user's plans with the data source, the fetch service and the model.
+A pull is one call to the data source for each of the user's domains, and one for each page of each keyword. A check is one read of robots.txt, one read of the homepage by the fetch service and one call of the model; a site that is closed or does not answer costs the read of robots.txt and, for a domain of the typo side at its first check, one call of the model. What that comes to depends on the user's plans. Say it once and leave the choice to them.
 
 ### 1.4 Who is told, and where
 
 Ask who looks at what the task tells, how often, and how it reaches them. The first two answers go into `purpose`, in the user's words, the third into `deliver`. How the loop closes is section 4.
 
-Say what the programs leave to the user, and ask how they will handle it, without waiting to be asked:
-
-- The programs end at found.csv in the task folder: they send no message, no mail and no chat notice, and there is no dashboard. Tell the user, without being asked, that their own tools can take over there. Another agent of theirs (an AI agent, or an automation they run) can read found.csv, and state.csv and the domains' files where it needs more, and bring what is told to them or their team. Or what is told can go straight into a system they use, through its interface: their team's chat, their tickets or their database, for example. What is then done about a domain stays their decision. Ask what they have and what they want, or whether they will open the file themselves.
-- The programs run only when the user's own scheduler starts them, on the machine it runs on. While that machine is off or asleep nothing is pulled or checked: the checks that came due wait. After a pause longer than `window_days` a pull by keyword starts over with the window of that day: what was registered before it is past the window the user chose, and this agent is about being early. The lookalike pull is not bound to registration dates and brings in the typos registered in the pause too. Ask on which machine the programs will run and how they are started.
-
-Where the user wants a notice, a dashboard, hosting, another agent or a system of theirs connected, say that the design leaves these to them and that you can help them connect it; build it only where they ask you to. Whatever is connected reads the files of the task folder and does not write them: the programs keep writing state.csv, the domains' files and found.csv.
+- The programs end at found.csv in the task folder: they send no message and there is no dashboard. Tell the user that their own tools can take over there: another agent of theirs can read found.csv, and state.csv and the domains' files where it needs more, or what is told can go into a system they use through its interface, such as their team's chat, tickets or database. What is then done about a domain stays their decision. Help connect it only where they ask; whatever is connected reads the task folder and does not write it.
+- The programs run only when the user's own scheduler starts them: while that machine is off or asleep, nothing is pulled or checked. After a pause longer than `window_days` a pull by keyword starts over with the window of that day; the lookalike pull is not bound to registration dates and brings in the typos registered in the pause too.
 
 What is told by default is in section 2.4. On the typo side: each domain once at its first check (what its site shows, or that it was registered and nothing shows yet), and each change of its state. On the business side: a site that shows or sells the user's brand. Not told, and kept in state.csv: a domain of the typo side whose name consists of ordinary words and whose site is in another field than the user's, and a site of the user's field without the brand. Say this to the user. Where they want to hear of more, or of less, their words go into `purpose` too.
 
