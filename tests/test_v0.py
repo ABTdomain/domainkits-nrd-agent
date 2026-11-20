@@ -1112,6 +1112,22 @@ class SkillTest(Base):
         self.assertIn("brand and organisation names", asked)
         self.assertIn("sign-in form", asked)
 
+    def test_a_report_for_an_unrelated_site_is_a_find_in_protection_and_not_in_a_business_task(self):
+        report = "A shop for shoes; your brand does not show."
+        for skill in ("", "protection"):
+            task = self.make(state=[DUE], skill=skill)
+            fetch = FakeFetch({"https://d.com/robots.txt": ALLOW, "https://d.com/": page("https://d.com/")})
+            quiet(run.main, [task], fetch=fetch, judge=FakeJudge(said(status="unrelated", report=report)),
+                  clock=at(NOW))
+            self.assertEqual(self.state(task)["d.com"]["status"], "unrelated")
+            found = self.found(task)
+            if skill:
+                self.assertEqual(found[1][1:], ["d.com", "unrelated", report])
+            else:
+                self.assertIsNone(found)
+                self.assertIn("not written: a report for a site judged unrelated",
+                              [x["result"] for x in self.log(task)])
+
     def test_a_skill_without_its_file_stops_the_run_before_any_request(self):
         for skill in ("nosuch", 5):
             task = self.make(state=[DUE], skill=skill)

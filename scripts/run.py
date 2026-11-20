@@ -739,6 +739,10 @@ def run(task, config, fetch, judge, clock, change=None):
 
             def tell(status, got):
                 report = (got.get("report") or "").strip()
+                if report and status == "unrelated" and not config.get("skill"):
+                    # In a business task unrelated means that the site does not fit what the user is after: no find.
+                    note("found", "not written: a report for a site judged unrelated")
+                    return
                 if report:
                     common.add_find(task, at, domain, status, report)
                     n["finds"] += 1
