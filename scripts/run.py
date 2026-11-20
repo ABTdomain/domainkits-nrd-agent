@@ -626,6 +626,12 @@ class Counted:
         return reply
 
 
+# A scheduler that starts pull.py first starts this program later each time the pull takes longer, so a row dated from
+# the start of one run can be due a minute or two after the start of the next. A run takes a row up to EARLY before its
+# time and dates what it writes from that time, not from its own start: the steps stay as they are.
+EARLY = timedelta(minutes=10)
+
+
 def run(task, config, fetch, judge, clock, change=None):
     """Checks the due rows. Returns the counts. change is the low-tier model, when the task names one. What the run
     cost goes into the log: the credits of each request to the fetch service, the tokens of each model call, and one
@@ -668,7 +674,7 @@ def run(task, config, fetch, judge, clock, change=None):
         if gone:
             rows = common.archive(task, rows, set(gone), at)
     due = sorted((r for r in rows if common.is_domain(r["domain"]) and r["domain"] not in exclude
-                  and common.parse(r["action-date"]) <= now),
+                  and common.parse(r["action-date"]) <= now + EARLY),
                  key=lambda r: common.parse(r["action-date"]))[:config["limits"]["checks_per_run"]]
     n = {"due": len(due), "skipped": 0, "fetched": 0, "not fetched": 0, "judged": 0, "finds": 0}
     if change:
@@ -679,13 +685,15 @@ def run(task, config, fetch, judge, clock, change=None):
     try:
         for row in due:
             domain = fetch.domain = row["domain"]
+            early = max(common.parse(row["action-date"]) - now, timedelta(0))     # taken before its time (EARLY)
             common.beat(task)
 
             def note(step, result):
                 common.log(task, "run", domain, step, result)
 
             def write(status, action, when):
-                row.update({"last-check": at, "status": status, "action": action, "action-date": common.fmt(when)})
+                row.update({"last-check": at, "status": status, "action": action,
+                            "action-date": common.fmt(when + early)})
                 common.write_state(task, rows)
                 note("row", f"{status}, due {row['action-date']}")
 

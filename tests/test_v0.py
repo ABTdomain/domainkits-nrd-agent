@@ -3,6 +3,7 @@ and judge. From the folder of the repository:  python -m unittest tests.test_v0 
 import contextlib
 import csv
 import io
+import itertools
 import json
 import os
 import shutil
@@ -414,6 +415,17 @@ class PullTest(Base):
         config = common.load_config(task)
         self.assertEqual((config["last_pull"], list(config)[-1]), ("2026-11-19T10:00Z", "last_pull"))
 
+    def test_last_pull_is_the_minute_the_pull_started_so_a_start_pull_every_later_finds_it_due(self):
+        # A pull that takes two minutes: a scheduler that starts the program every 6 hours finds it due again.
+        task = self.make(pull_every="6h")
+        times = itertools.chain([NOW], itertools.repeat(NOW + timedelta(minutes=2)))
+        self.assertEqual(quiet(pull.main, [task], source=FakeSource({("flooring", 1): ["a.com"]}),
+                               clock=lambda: next(times)), 0)
+        self.assertEqual(common.load_config(task)["last_pull"], "2026-11-19T10:00Z")
+        self.assertEqual(quiet(pull.main, [task], source=FakeSource({("flooring", 1): ["b.com"]}),
+                               clock=at(NOW + timedelta(hours=6))), 0)
+        self.assertEqual([r["domain"] for r in common.read_state(task)], ["a.com", "b.com"])
+
     def test_pull_without_its_list_stops_with_a_message_and_no_call(self):
         task = self.make(pulls=[{"kind": "tld", "tld": ["ai"], "filters": {}}])
         source, out = FakeSource({}), io.StringIO()
@@ -793,6 +805,27 @@ class RunTest(Base):
         for sooner in ("2026-11-31T10:00Z", "2026-11-20 10:00", 5):
             self.assertEqual(run.answer(said(sooner=sooner))[1], "sooner not in the form YYYY-MM-DDTHH:MMZ")
         self.assertEqual(run.answer(said(status="preparing", tier="low", sooner="2026-11-20T10:00Z"))[1], "")
+
+    def test_a_row_due_up_to_ten_minutes_after_the_start_is_taken_and_keeps_its_step(self):
+        # The run starts two minutes before d.com is due, as after a pull that took less time than the last one.
+        task = self.make(state=[("d.com", "2026-11-16T10:02Z", "in_use", "Look again.", "2026-11-19T10:02Z"),
+                                ("e.com", "2026-11-16T10:11Z", "in_use", "Look again.", "2026-11-19T10:11Z")])
+        fetch = FakeFetch({"https://d.com/robots.txt": ALLOW, "https://d.com/": page("https://d.com/")})
+        quiet(run.main, [task], fetch=fetch, judge=FakeJudge(said()), clock=at(NOW))
+        self.assertEqual(fetch.urls, ["https://d.com/robots.txt", "https://d.com/"])
+        state = self.state(task)
+        self.assertEqual((state["d.com"]["last-check"], state["d.com"]["action-date"]),
+                         ("2026-11-19T10:00Z", "2026-11-22T10:02Z"))   # 3 days from its time, not from the start
+        self.assertEqual(state["e.com"]["action-date"], "2026-11-19T10:11Z")   # 11 minutes: not taken
+
+    def test_a_row_taken_before_its_time_is_still_not_fetched_sooner_than_min_interval(self):
+        task = self.make(state=[("d.com", "2026-11-19T09:02Z", "preparing", "Look again.", "2026-11-19T10:02Z")])
+        common.add_record(task, "d.com", {"at": "2026-11-19T09:02Z", "kind": "fetch"})
+        fetch, judge = FakeFetch({}), FakeJudge()
+        quiet(run.main, [task], fetch=fetch, judge=judge, clock=at(NOW))
+        self.assertEqual((fetch.urls, judge.calls, self.state(task)["d.com"]["action-date"]),
+                         ([], [], "2026-11-19T10:02Z"))
+        self.assertIn("skip", [x["step"] for x in self.log(task)])
 
     # ------------------------------------------------ redirects (F3, F4)
     def test_robots_read_ending_on_another_host_that_disallows_stops_the_fetch(self):

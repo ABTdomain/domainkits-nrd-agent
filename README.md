@@ -106,7 +106,7 @@ Whatever a model says:
 - **No direct connection.** The programs open no connection to a site. Fetching is plain: a block is not worked around.
 - **Personal data.** Phone numbers, e-mail addresses and contact fields are taken out of what a model is given. A name of a person in the text of a page is not found this way. The domain's file keeps each reply as it was received.
 - **Keys.** A key goes only to the service it is for: the requests to DomainKits, Firecrawl and the model APIs follow no redirect.
-- **Timing.** The time of the next check is worked out by the program from `frequency`, not by the model. No site is fetched more often than `min_interval`.
+- **Timing.** The time of the next check is worked out by the program from `frequency`, not by the model. No site is fetched more often than `min_interval`. A pull notes the minute it started, and a check takes a row up to 10 minutes before its time and keeps its steps, so a scheduler that starts the pull first and the check after it does not push either to its next start.
 - **One run at a time.** A task folder has a lock. A failure of the fetch service or of the judge's model API stops the run and says so; the row it was at is put back by a day.
 
 The full list is in section 3 of [SKILL.md](SKILL.md).

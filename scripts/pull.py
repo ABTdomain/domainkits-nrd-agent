@@ -11,9 +11,10 @@ pull brings in the ones that exist, later pulls the ones registered since. Each 
 brought in: no number limits what a pull adds. An entry's side (typo or business), where it names one, is written
 into the source record of each domain it brings in. The keywords, TLDs and brand domains take turns, one new domain
 each, so the new domains of one do not stand in state.csv before those of the others: the check takes the rows that
-came in first. Where config.json holds pull_every, the pull is made only when that time has passed since the last one, which
-the program notes as last_pull in config.json: so the scheduler can start the program more often than the pull is
-due. A value of the data source that is no domain name is not brought in. Exit code 0 when done or not due; 1 when it
+came in first. Where config.json holds pull_every, the pull is made only when that time has passed since the last one
+started, which the program notes as last_pull in config.json: so the scheduler can start the program more often than
+the pull is due, and a scheduler that starts it every pull_every finds it due again however long the last pull took.
+A value of the data source that is no domain name is not brought in. Exit code 0 when done or not due; 1 when it
 did not start (no config.json in the folder, a config.json it cannot work with, a run in progress, the key not set),
 when the data source failed, or when another start took its lock over while it was at work."""
 import itertools
@@ -336,7 +337,8 @@ def main(argv=None, source=None, clock=common.utcnow):
             print("config.json: " + "; ".join(problems) + ".")
             return 1
         every, last = config.get("pull_every"), config.get("last_pull")
-        if every and last and common.parse(last) + common.duration(every) > clock():
+        started = clock()
+        if every and last and common.parse(last) + common.duration(every) > started:
             print(f"pull: not due before {common.fmt(common.parse(last) + common.duration(every))} "
                   f"(pull_every {every})")
             return 0
@@ -362,7 +364,7 @@ def main(argv=None, source=None, clock=common.utcnow):
             # Read again: the user or the assistant may have changed the file while the pull was at work, and
             # only last_pull is the program's to write here.
             fresh = common.load_config(task)
-            fresh["last_pull"] = common.fmt(clock())
+            fresh["last_pull"] = common.fmt(started)     # the minute the pull started, as run.py dates its rows
             common.save_config(task, fresh)
         print(f"pull: {n['calls']} calls, {n['rows']} rows seen, {n['added']} domains added")
         return 0
