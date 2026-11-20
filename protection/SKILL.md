@@ -37,17 +37,19 @@ This step needs a top-tier model. Claude Opus 5.5 or above is recommended; the u
 
 Say at the start what the task does and what it leaves alone: it keeps the states of the watched domains current and says what each is doing, and each decision stays with the user.
 
+Keep each message to the user short: a few questions at a time, and only the counts and names they need for the choice at hand.
+
 ### 1.1 What to ask
 
 Ask for both sides and keep the user's words:
 
 - The name: the brand as it is written, and the domain or domains that carry it. Ask also for other sites of the user that a close name may lead to, such as the site of a second product: they are written into `intent` as the user's own.
-- The product: what the user's site offers, in one or two sentences.
+- The main business and the main product: what the user's business does and what its site offers, in one or two sentences. Do not answer this for the user. It is the standard on both sides: whether a site is in the user's field, for a domain of the typo side as for one of the business side, is read against it. It also helps the user judge a case themselves; the skill gives no verdict. Write it into `intent` with the user's other words, so that the judge reads it too.
 - The core keywords of the product: the words a new site in the same field would carry in its name. Which words these are is the user's answer.
 
 | Field of config.json | Content |
 |---|---|
-| intent | The user's words: which name is watched, with the brand and the domain written out. |
+| intent | The user's words: which name is watched, with the brand and the domain written out, and the main business and the main product. |
 | related | The measure for a site in use (2.2), in one sentence with two parts: a site that offers the same as or something similar to the user's product, or that shows or sells the user's brand. |
 
 The user judges your description: show them, in plain words, how you understand their product and their field, and the sentence for `related`, and ask whether it is accurate. Change it until they say it is right: each judgement of a site later is set against it.
@@ -70,7 +72,7 @@ Each pull names its side in config.json: `"side": "typo"` or `"side": "business"
 - A typo that is a part of the user's name (googl for google, domainkit for domainkits) also brings in each name that holds the name itself. A typo that is an ordinary word (goggle for google) brings in that word's ordinary names as a keyword: say so and let the user choose. The typo of the domain itself still comes in through the lookalike pull.
 - What these pulls do not see: a typo that was registered under another TLD before the window began (`window_days`). The `tld_check` tool lists such registrations in the conversation; the programs do not watch them.
 - The filters go on the pull by core keywords and nowhere else.
-- Test each keyword as the business skill does (its section 1.4): read the names it brings over one recent week, sort them, and narrow a word whose names mostly mean something else. Tell the user, without being asked, that too many keywords bring too much noise and too much cost: each one is one more query at each pull, and each domain it brings in is one more check. The user confirms the name, the main typos and the core keywords before the file is written.
+- Test each keyword as the business skill does (its section 1.4): read the names it brings over one recent week, sort them, and narrow a word whose names mostly mean something else. Tell the user, without being asked, that too many keywords bring too much noise and too much cost: each one is one more query at each pull, and each domain it brings in is one more check. The user confirms the name and the main typos, and picks the core keywords from your candidates: three to five serve best. Write them into the file only then.
 
 ### 1.3 The frequencies
 
@@ -83,14 +85,14 @@ How often and how wide the task watches is the user's to set. Go through the num
 - The lower bound between two fetches of one site (`min_interval`, 1 hour as a start), and how many domains one run checks (`checks_per_run` in `limits`, 50 as a start).
 - How long a domain is watched (`retire_days`, optional), counted from its registration date. With it, the variants registered longer ago than that are not watched at all, and a site in use leaves once its domain is that old. To know what the existing typos are doing, leave the field out, as the example below does.
 
-A pull is one call to the data source for each of the user's domains, and one for each page of each keyword. A check is one read of robots.txt, one read of the homepage by the fetch service and one call of the model; a site that is closed or does not answer costs the read of robots.txt and, for a domain of the typo side at its first check, one call of the model. What that comes to depends on the user's plans. Say it once and leave the choice to them.
+A pull is one call to the data source for each of the user's domains, and one for each page of each keyword. A check is one read of robots.txt, one read of the homepage by the fetch service and one call of the model; a site that is closed or does not answer costs the read of robots.txt and, for a domain of the typo side at its first check, one call of the model. What that comes to depends on the user's plans. Say also what one domain costs over the whole watching: a domain that stays idle is checked at each step of the ladder, about 85 checks over 60 days with the ladder of the example, and without `retire_days` on at the last step for as long as the task runs. Say it once and leave the choice to them.
 
 ### 1.4 Who is told, and where
 
-Ask who looks at what the task tells, how often, and how it reaches them. The first two answers go into `purpose`, in the user's words, the third into `deliver`. How the loop closes is section 4.
+Ask who looks at what the task tells, how often, and how it reaches them. The first two answers go into `purpose`, in the user's words, the third into `deliver` as `note`. How the loop closes is section 4.
 
 - The programs end at found.csv in the task folder: they send no message and there is no dashboard. Tell the user that their own tools can take over there: another agent of theirs can read found.csv, and state.csv and the domains' files where it needs more, or what is told can go into a system they use through its interface, such as their team's chat, tickets or database. What is then done about a domain stays their decision. Help connect it only where they ask; whatever is connected reads the task folder and does not write it.
-- The programs run only when the user's own scheduler starts them: while that machine is off or asleep, nothing is pulled or checked. After a pause longer than `window_days` a pull by keyword starts over with the window of that day; the lookalike pull is not bound to registration dates and brings in the typos registered in the pause too.
+- The programs run only when the user's own scheduler starts them: while that machine is off or asleep, nothing is pulled or checked. After a pause longer than `window_days` a pull by keyword starts over with the window of that day; the lookalike pull is not bound to registration dates and brings in the typos registered in the pause too. The key names and `env_file` in config.json are those of that machine.
 
 What is told by default is in section 2.4. On the typo side: each domain once at its first check (what its site shows, or that it was registered and nothing shows yet), and each change of its state. On the business side: a site that shows or sells the user's brand. Not told, and kept in state.csv: a domain of the typo side whose name consists of ordinary words and whose site is in another field than the user's, and a site of the user's field without the brand. Say this to the user. Where they want to hear of more, or of less, their words go into `purpose` too.
 
@@ -99,7 +101,7 @@ What is told by default is in section 2.4. On the typo side: each domain once at
 ```json
 {
   "skill": "protection",
-  "intent": "We run DomainKits at domainkits.com. I want to know what the domains close to our name are doing, and when a new site in our field shows our brand.",
+  "intent": "We run DomainKits at domainkits.com. Our main business is domain data: tools and an API for searching and monitoring domain names. I want to know what the domains close to our name are doing, and when a new site in our field shows our brand.",
   "related": "A site that offers the same as or something similar to our product, tools for searching and monitoring domain names, or that shows or sells the DomainKits brand.",
   "purpose": "I look at what is told once a week and decide myself what to do.",
   "pulls": [
@@ -126,7 +128,7 @@ What is told by default is in section 2.4. On the typo side: each domain once at
     "unrelated": "14d",
     "ladder": {"3d": "3h", "7d": "6h", "14d": "12h", "30d": "24h", "60d": "48h"}
   },
-  "deliver": {"to": "found.csv"},
+  "deliver": {"to": "found.csv", "note": "I open found.csv myself once a week."},
   "exclude": [],
   "models": {"judge": "claude-sonnet-5-5"},
   "pull_every": "1h",

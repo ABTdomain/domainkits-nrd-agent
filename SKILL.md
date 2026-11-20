@@ -17,14 +17,14 @@ What stands in the way is noise. Most newly registered domains stay idle after r
 
 So the agent cuts the noise before a single page is read, in two steps:
 
-1. **The user's intent.** In the first conversation a top-tier model draws out with the user what they are after: the words such a site carries in its name, or the TLDs it sits under, and what makes a site fit. The words are tested against real names, and the user confirms them. This decides what is pulled at all (section 1).
+1. **The user's intent.** In the first conversation a top-tier model draws out with the user what they are after. The user says what their main business is, what their main product is, and what the sites they want to watch do: that is the standard each site is judged by. From it come the words such a site carries in its name, or the TLDs it sits under, and what makes a site fit. The words are tested against real names, and the user confirms them. This decides what is pulled at all (section 1).
 2. **The DomainKits filters.** DomainKits does not stop at listing newly registered domains: it keeps the mail servers, the nameservers and the registration date of each one current. Used as filters, they leave out the domains that are parked, held for sale or show no sign of their holder, before a page is read. Because the records are kept current, a pull repeated over the same days also brings in a domain whose record has come to match since.
 
 What is left is a small set. Each domain in it is checked soon after it comes in, the fetch and the model are spent on it, and the right finds stand out. The noise does not go to nothing, and that is normal: a task is measured by the right finds it makes early, not by the share of noise.
 
 A filter is no statement that a domain is in use. Whether a site is there, and what it is, is decided by reading the page (section 2).
 
-Say this to the user at the start, in plain words, and add one thing: they are free to pull the data into a monitoring system of their own. What this agent offers is the other way: the intent and the filters first, so that the search is small.
+Say this to the user at the start, in a few plain sentences, and add one thing: they are free to pull the data into a monitoring system of their own. What this agent offers is the other way: the intent and the filters first, so that the search is small.
 
 A task is one direction of one user: one config.json and one state machine of five states (2.2).
 
@@ -34,6 +34,8 @@ The first conversation has one result: a config.json that says what the user wan
 
 This step needs a top-tier model, because everything after it follows from it. Claude Opus 5.5 or above is recommended; the user can choose another. If you are a smaller model than that, say so before you start and let the user decide.
 
+Keep each message to the user short: a few questions at a time, and only the counts and names they need for the choice at hand.
+
 ### 1.1 Know what the account can use
 
 config.json has a section `source`: the filters and the country-code TLDs the account can use for each search tool, how a call is counted, and the day this was read. The program writes it at its first pull and refreshes it every 5 days. In the first conversation, call the `usage` tool of the DomainKits MCP yourself and propose only filters the account has. Where usage says "all" for the filters of `nrds`, the names are those of the parameters of the `nrds` tool. How many filters can be combined depends on the account's plan.
@@ -41,6 +43,8 @@ config.json has a section `source`: the filters and the country-code TLDs the ac
 ### 1.2 Hear what the user wants
 
 Let the user say in their own words what they want to find and what for. Keep these words as they are: they go into config.json as `intent`.
+
+Then ask three things, and do not answer them for the user: their main business; their main product; and what the sites they want to watch do. For competitors that is what the competitors they mean offer, and which of the user's products each competes with; for customers or projects, what such a business or project does. These answers are the standard every site is judged by, in each direction this skill watches: write them into `intent` with the user's other words, so that the judge reads them too, and write `related` from the third, in the user's terms, and not from your own idea of their field. Where an answer is vague, ask again with an example from the names you read (1.4): does a site like this one count?
 
 Then sort what they said into two kinds of conditions:
 
@@ -99,7 +103,7 @@ Further filters by kind of pull:
 - A filter also removes sites the user would have wanted ("MX present" leaves out a site whose holder sets up no mail). Say what each filter leaves out and let the user choose.
 - The trying happens in this conversation, and later in section 4: the programs run the pulls as config.json holds them, and no model calls the data source on its own.
 
-The user confirms the words. Show them the words and TLDs you would keep and those you dropped, each with its three counts, a few of its names and its rows a day, and write them into config.json only when the user has confirmed them or changed them.
+The user picks the words. Show them the candidates you would keep and those you dropped, each with its three counts, a few of its names and its rows a day, and let them choose. Three to five keywords in the end serve best: more bring in noise and cost faster than they bring finds. Write the words into config.json only when the user has chosen them.
 
 ### 1.5 Settle the numbers with the user
 
@@ -113,15 +117,15 @@ How often and how wide the task watches is the user's to set. Go through the num
 - How many domains one run checks (`checks_per_run` in `limits`, 50 as a start). With how often the user's scheduler starts the check, it sets how fast the first checks of a pull are worked off.
 - How long a domain is watched (`retire_days`), counted from its registration date. Past it the domain leaves the watching, whatever its state: its row and its file go into the archive (section 3). Keep it above `window_days`. 60 days is a start, where the ladder of the example ends; without the field a domain is watched without an end.
 
-A check costs one read of robots.txt, one read of the homepage by the fetch service and one call of the model; what that comes to depends on the user's plans. Say it once and leave the choice to them. The program works out the time of each next check from `frequency`; the model that judges does not set it.
+A check costs one read of robots.txt, one read of the homepage by the fetch service and one call of the model; what that comes to depends on the user's plans. Say also what one domain costs over the whole watching: a domain that stays idle is checked at each step of the ladder until `retire_days`, about 85 checks with the ladder and the 60 days of the example, fewer with a slower ladder or fewer days. Times the new domains a day, that is the checks a day once the task has filled. Say it once and leave the choice to them. The program works out the time of each next check from `frequency`; the model that judges does not set it.
 
 ### 1.6 Ask where it ends
 
 Before the file is written, ask the user four things, without waiting to be asked:
 
 - What the watching is for: what they will do when something is found. This goes into `purpose`, in their words, and decides what is worth telling them: for someone who looks for new AI projects, a site that came into use; for someone who watches for competitors around them, a new competitor's site, and later a change on it.
-- How the finds reach them. The programs end at found.csv in the task folder: they send no message, no mail and no chat notice, and there is no dashboard. Tell the user that their own tools can take over there: another agent of theirs can read found.csv, and state.csv and the domains' files where it needs more, or the finds can go into a system they use through its interface, such as their CRM, tickets, team chat or database. Their answer goes into `deliver`, in their words. Help connect it only where they ask; whatever is connected reads the task folder and does not write it.
-- Where the programs run. They run only when the user's own scheduler starts them, on the machine it runs on: while that machine is off or asleep, nothing is pulled or checked. After a pause longer than `window_days` the next pull starts over with the window of that day: this agent is about being early.
+- How the finds reach them. The programs end at found.csv in the task folder: they send no message, no mail and no chat notice, and there is no dashboard. Tell the user that their own tools can take over there: another agent of theirs can read found.csv, and state.csv and the domains' files where it needs more, or the finds can go into a system they use through its interface, such as their CRM, tickets, team chat or database. Their answer goes into `deliver` as `note`, in their words. Help connect it only where they ask; whatever is connected reads the task folder and does not write it.
+- Where the programs run. They run only when the user's own scheduler starts them, on the machine it runs on: while that machine is off or asleep, nothing is pulled or checked. After a pause longer than `window_days` the next pull starts over with the window of that day: this agent is about being early. The key names and `env_file` in config.json are those of that machine: where it is another machine than the one you are on, write its path, or leave `env_file` out where the keys will be set in its environment.
 - How the loop closes: how often they look at the finds, and how they tell you which ones were of use (section 4).
 
 The agent hands the finds over and stops there. It contacts no one and drafts no message.
@@ -155,7 +159,7 @@ The first follows interesting new AI projects. In full:
     "unrelated": "14d",
     "ladder": {"3d": "3h", "7d": "6h", "14d": "12h", "30d": "24h", "60d": "48h"}
   },
-  "deliver": {"to": "found.csv"},
+  "deliver": {"to": "found.csv", "note": "I open found.csv myself every morning."},
   "exclude": [],
   "models": {"judge": "claude-sonnet-5-5"},
   "pull_every": "1d",
@@ -197,13 +201,13 @@ The second looks for new competitors around a flooring business. It differs from
 | pulls | you, confirmed by the user | a list; each entry has `kind` (keyword or tld), its items as a list (`keywords` for a keyword pull, `tlds` for a tld pull) and `filters`, written with the names and values of the tool's parameters so the program passes them on as they are |
 | frequency | you from the defaults, decided by the user | how often each state is checked; "ladder" is the ladder by days since registration (section 3); `preparing` has a step for each of its two tiers (2.2); `robots_disallow` is the step for a site that robots.txt closes to the fetch |
 | purpose | you, from the user | what the user will do with the finds, in their words (1.6) |
-| deliver | you, decided by the user | how the finds reach the user, in their words (1.6). It is a note for you and the user: the programs write found.csv and send nothing |
+| deliver | you, decided by the user | `{"to": "found.csv", "note": "..."}`: `note` holds how the finds reach the user, in their words (1.6). It is a note for you and the user: the programs write found.csv and send nothing |
 | exclude | the user, or you on their word | domains the user is done with: they are not pulled and not checked again |
 | models | you, decided by the user | `judge`: the model that judges (section 2); Claude Sonnet 5.5 or above, or a model of the same class of another provider, is recommended. Which model, the user decides. `change`, optional: a low-tier model that is asked first, at a later check, whether the site changed since its last judgement (section 3). A model of another provider is written with the provider in front, as in `openai:gpt-6.2-sol`; a name without one is a Claude model |
 | pull_every, window_days, min_interval, limits | you from the defaults, decided by the user | the numbers of 1.5 |
 | retire_days | you as a start, decided by the user | optional: the number of days a domain is watched, counted from its registration date (1.5). Without the field there is no end |
 | keys | the user | the names of the environment variables that hold the keys; the keys themselves are not written into this file. `model` names the key for Claude; a model of another provider needs the name of that provider's key under the provider's name, as in `"openai": "OPENAI_API_KEY"` |
-| env_file | the user | optional, a field of its own at the top level and not inside `keys`: the path of a file with KEY=VALUE lines, from which a key is read when it is not in the environment. A relative path counts from the task folder. |
+| env_file | the user | optional, a field of its own at the top level and not inside `keys`: the path of a file with KEY=VALUE lines, on the machine where the programs run, from which a key is read when it is not in the environment. A relative path counts from the task folder. |
 | source | the program | what the account can use (1.1). Leave it out of the file you write: the program adds it at its first pull. |
 
 The user confirms the file or changes it. When the direction changes later, config.json is changed, not the programs.
