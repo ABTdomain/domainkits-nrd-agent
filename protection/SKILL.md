@@ -139,6 +139,8 @@ What is told by default is in section 2.4. On the typo side: each domain once at
 }
 ```
 
+When the user has confirmed the file, write notes.md into the task folder as the business skill says (its section 1.7): the date, the user's answers of 1.1, the variants and keywords read with their counts and why each was kept or dropped, and the numbers chosen.
+
 `skill` marks the task as a protection task. The first two pulls are the typo side: the variants of the domain, then the name itself and the main typos. The third is the business side: the core keywords of the product. A lookalike pull can carry `registered_from` (a date, YYYY-MM-DD). `retire_days` is left out, so the variants that were registered long ago come in and no domain leaves the watching (1.3). The other fields are those of the business skill (its section 1.7).
 
 ## 2. Judging a domain
@@ -254,3 +256,4 @@ When the user comes back, or asks what was found:
 - A domain the user is done with goes on `exclude`: their own registration, a business they know, a case they have dealt with.
 - Where the user still takes what is told on by hand, say again that another agent of theirs, or the interface of a system they use, can take that over from found.csv (1.4). This is about how what is told reaches them, not a next step for a domain.
 - Change config.json and show the change. The programs follow it from their next run.
+- Add to notes.md, with the date, what the user said and what was changed, and why. Read notes.md first when the user comes back.

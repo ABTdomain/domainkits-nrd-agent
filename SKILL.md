@@ -212,6 +212,8 @@ The second looks for new competitors around a flooring business. It differs from
 
 The user confirms the file or changes it. When the direction changes later, config.json is changed, not the programs.
 
+Then write notes.md into the task folder, for the user's own later review: the date, the user's three answers (1.2) and your description with what the user changed in it, each word and TLD you tested with its three counts, a few names and why it was kept or dropped, the numbers the user chose (1.5), and the four answers of 1.6. config.json holds what was decided; notes.md holds why.
+
 ## 2. Judging a domain
 
 A check hands you one domain with what is known about it and asks for a judgement: the status, the next step, and what to tell the user. The program sends this section to the model as it stands when it runs the checks, so it is written to be read on its own.
@@ -285,6 +287,7 @@ A task lives in one folder.
 | state.csv | The state machine, one row per domain: domain, last-check, status, action, action-date. | The programs. |
 | domains/<domain>.jsonl | The domain's file, one line per record with its time: the row of the data source, each reply of the fetch service as received, each fetch that was not made and why, and each answer of a model as it was received, with the model's name. | The programs. |
 | found.csv | The finds for the user, one line each: time, domain, status, and what the model has to tell. | The programs. |
+| notes.md | What was decided with the user and why: the setup (1.7) and each review (section 4), each with its date. The programs do not read it. | You. |
 | log.jsonl | What each run did, one line per step, and what it cost: the credits of each request to the fetch service, the tokens of each model call, and one line for the whole run. No page text. | The programs. |
 | archive/ | The domains past `retire_days`: archive/state.csv holds their rows as they stood, with the time each one left, and archive/domains their files. | The programs. |
 
@@ -324,5 +327,6 @@ When the user comes back, or asks what was found:
 - A domain the user is done with goes on `exclude`.
 - A domain past `retire_days` is in the archive: its last row in archive/state.csv, its file under archive/domains. Where the watching ends too soon or too late for the user, change `retire_days`: the new number holds for the domains still in state.csv.
 - Change config.json and show the change. The programs follow it from their next run.
+- Add to notes.md, with the date, what the user said about the finds and what was changed, and why. Read notes.md first when the user comes back: it says why the task stands as it does.
 
 Where the user still takes the finds on by hand, say again that another agent of theirs, or the interface of a system they use, can take that over from found.csv (1.6). Build the connection only where the user asks for it.

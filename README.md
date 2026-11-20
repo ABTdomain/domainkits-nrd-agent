@@ -92,6 +92,7 @@ A model name without a provider is a Claude model (`claude-sonnet-5-5`). A model
 | `state.csv` | The state machine, one row per domain: domain, last-check, status, action, action-date |
 | `domains/<domain>.jsonl` | Each domain's records: the data source row, each fetch reply as received, each model answer |
 | `found.csv` | The finds for you: time, domain, status, what to tell |
+| `notes.md` | What was decided with you and why, at the set-up and at each review; written by your agent, read by no program |
 | `log.jsonl` | What each run did and what it cost (fetch credits, model tokens) |
 | `archive/` | Domains past `retire_days`, with their rows and files as they were |
 
